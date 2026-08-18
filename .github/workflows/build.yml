@@ -1,0 +1,78 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        shell: bash
+        run: ./gradlew assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-${{ matrix.os }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      # ---- Signed release build (optional) ----
+      # To publish a signed release APK from CI, add these repository secrets:
+      #   KEYSTORE_FILE              (the keystore, base64-encoded)
+      #   KEYSTORE_STORE_PASSWORD
+      #   KEYSTORE_KEY_ALIAS
+      #   KEYSTORE_KEY_PASSWORD
+      # Then uncomment the steps below. The keystore is written outside the
+      # checkout so it never ends up in the workspace, and is cleaned up after.
+      #
+      # - name: Restore keystore
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   run: |
+      #     echo "${{ secrets.KEYSTORE_FILE }}" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+      #   shell: bash
+      #
+      # - name: Build signed release APK
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   env:
+      #     KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+      #     KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+      #     KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+      #     KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+      #   run: ./gradlew assembleRelease
+      #   shell: bash
+      #
+      # - name: Upload signed release APK
+      #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-release
+      #     path: app/build/outputs/apk/release/app-release.apk
+      #     if-no-files-found: error
