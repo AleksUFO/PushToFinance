@@ -109,6 +109,15 @@ Output (unsigned, if no keystore): `app/build/outputs/apk/release/app-release-un
 adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
+## 5.1 First-run setup
+
+After installing, grant the two things the app needs:
+
+1. **Notification access** — the app shows a button in *Settings → Notification access* that opens the system screen where you enable PushToFinance. This is required to capture pushes.
+2. **Notification permission** (Android 13+ / API 33+) — allow notifications so captured payments can be surfaced as heads-up notifications.
+
+By default the app runs a **background listening** foreground service that keeps the notification listener alive, so payments are captured even when the app is closed. If your device reports that notifications are only captured while the app is open, check that *Settings → Notification access → Background listening* is enabled and that the app isn't battery-restricted or force-stopped. On Android 14+ (API 34+) the service uses the `specialUse` foreground service type, declared with `FOREGROUND_SERVICE_SPECIAL_USE` in the manifest.
+
 ## 6. Common issues
 
 | Symptom | Fix |

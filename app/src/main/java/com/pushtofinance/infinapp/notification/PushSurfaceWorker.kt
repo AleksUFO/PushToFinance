@@ -14,6 +14,7 @@ class PushSurfaceWorker(appContext: Context, params: WorkerParameters) : Corouti
 
     override suspend fun doWork(): Result {
         return runCatching {
+            ListenerService.sweepIfAvailable()
             val repo = AppRepository.get(applicationContext)
             val pending = repo.pendingPushLogs()
             if (pending.isEmpty()) return Result.success()

@@ -46,6 +46,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val theme: StateFlow<String> = settings.theme.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "SYSTEM")
     val onboarded: StateFlow<Boolean> = settings.onboarded.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val keepAlive: StateFlow<Boolean> = settings.keepAlive.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
     val selectedApps: StateFlow<Set<String>> = settings.selectedApps.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
     val aiKey: StateFlow<String> = settings.aiKey.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
     val aiProvider: StateFlow<String> = settings.aiProvider.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
@@ -97,6 +98,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun setOnboarded(v: Boolean) = viewModelScope.launch { settings.setOnboarded(v) }
+    fun setKeepAlive(v: Boolean) = viewModelScope.launch { settings.setKeepAlive(v) }
     fun setTheme(v: String) = viewModelScope.launch { settings.setTheme(v) }
     fun setAiKey(v: String) = viewModelScope.launch { settings.setAiKey(v) }
     fun setAiProvider(v: String) = viewModelScope.launch { settings.setAiProvider(v) }

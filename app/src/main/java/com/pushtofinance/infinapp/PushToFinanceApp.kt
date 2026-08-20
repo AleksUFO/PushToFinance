@@ -6,10 +6,13 @@ import android.app.NotificationManager
 import android.content.Context
 import com.pushtofinance.infinapp.data.AppRepository
 import com.pushtofinance.infinapp.data.SettingsManager
+import com.pushtofinance.infinapp.notification.ListenerKeepAliveService
 import com.pushtofinance.infinapp.notification.PushSurfaceWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class PushToFinanceApp : Application() {
 
@@ -25,6 +28,11 @@ class PushToFinanceApp : Application() {
         settings = SettingsManager(this)
         createChannels()
         PushSurfaceWorker.schedule(this)
+        appScope.launch {
+            if (settings.keepAlive.first()) {
+                ListenerKeepAliveService.start(this@PushToFinanceApp)
+            }
+        }
     }
 
     private fun createChannels() {

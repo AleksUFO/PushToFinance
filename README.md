@@ -13,7 +13,8 @@ Captures payment push notifications from your banking apps, parses amount / curr
 ## ✨ Features
 
 - 📲 **Notification capture** — listens to your banking app notifications via Android NotificationListenerService (no root required).
-- 🔢 **Smart parsing** — detects amounts (`25.50 zł`, `12.99 EUR`, `$4.99`), currency, card (Visa / Mastercard / Google Pay / Blik) and store/merchant name.
+- 🔕 **Background listening** — keeps the listener alive in the background with a foreground service so payments are captured even when the app is closed; missed notifications are caught up on reconnect and on app open (can be turned off to save battery).
+- 🔢 **Smart parsing** — detects amounts (`12,34 zł`, `12.99 EUR`, `$4.99`, `100 PLN`), currency, card (Visa / Mastercard / Google Pay / Blik) and store/merchant name, plus income vs. expense (e.g. Revolut “przesyła Ci”, Google Pay “Kwota”).
 - 🤖 **Multi-provider AI** — automatic category & store detection powered by any of these providers:
   - **Google Gemini**
   - **OpenAI (GPT)**
@@ -40,7 +41,7 @@ Captures payment push notifications from your banking apps, parses amount / curr
 | Database   | Room (SQLite)                                      |
 | Settings   | DataStore Preferences                              |
 | Networking | OkHttp + kotlinx.serialization                    |
-| Background | WorkManager (resurface pending captures)          |
+| Background | WorkManager (resurface pending captures) + foreground service (listener keep-alive) |
 | Min / target SDK | 26 / 36                                     |
 
 ## 🚀 Quick start
@@ -96,7 +97,19 @@ app/src/main/java/com/pushtofinance/infinapp/
 
 ## 🧪 Testing
 
-Send a simulated push from *Settings → Testing → Test push* to exercise the whole capture → parse → save pipeline without touching a real bank app.
+Send a simulated push from *Settings → Testing → Test push* to exercise the whole capture → parse → save pipeline without touching a real bank app. Real-world templates that are parsed correctly include:
+
+```
+Nazwa sklepu 💳                       <- Revolut expense (title = merchant)
+Zapłacone 12,34 zł w sklepie Nazwa sklepu.
+Pozostałe saldo: 23,45 zł
+
+Imię Nadawcy przesyła Ci 12,34 PLN✅  <- Revolut income
+Notatka do przelewu
+
+Nazwa sklepu                         <- Google Pay
+Kwota 12,34 zł - karta Nazwa karty
+```
 
 ## 🤝 Contributing
 

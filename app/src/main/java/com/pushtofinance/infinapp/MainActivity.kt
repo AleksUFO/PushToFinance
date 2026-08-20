@@ -9,6 +9,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.pushtofinance.infinapp.notification.ListenerKeepAliveService
+import com.pushtofinance.infinapp.notification.ListenerService
 import com.pushtofinance.infinapp.ui.AppNavHost
 import com.pushtofinance.infinapp.ui.MainViewModel
 import com.pushtofinance.infinapp.ui.OnboardingScreen
@@ -17,6 +19,16 @@ import com.pushtofinance.infinapp.ui.theme.PushToFinanceTheme
 class MainActivity : ComponentActivity() {
 
     private val vm: MainViewModel by viewModels()
+
+    override fun onStart() {
+        super.onStart()
+        if (vm.keepAlive.value) {
+            ListenerKeepAliveService.start(this)
+        } else {
+            ListenerKeepAliveService.stop(this)
+        }
+        ListenerService.sweepIfAvailable()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()

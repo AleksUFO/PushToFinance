@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavHostController
 import com.pushtofinance.infinapp.ai.AiProvider
+import com.pushtofinance.infinapp.notification.ListenerKeepAliveService
 import com.pushtofinance.infinapp.ui.MainViewModel
 import com.pushtofinance.infinapp.ui.Routes
 import com.pushtofinance.infinapp.ui.components.AppSelectionList
@@ -62,6 +63,7 @@ fun SettingsScreen(vm: MainViewModel, nav: NavHostController) {
     val aiProvider by vm.aiProvider.collectAsState()
     val aiModel by vm.aiModel.collectAsState()
     val aiBaseUrl by vm.aiBaseUrl.collectAsState()
+    val keepAlive by vm.keepAlive.collectAsState()
     val apps by rememberInstalledApps(context)
 
     var keyDraft by remember { mutableStateOf(aiKey) }
@@ -69,9 +71,7 @@ fun SettingsScreen(vm: MainViewModel, nav: NavHostController) {
     var modelDraft by remember { mutableStateOf(aiModel) }
     var baseUrlDraft by remember { mutableStateOf(aiBaseUrl) }
 
-    val listenerEnabled = remember(context) {
-        NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
-    }
+    val listenerEnabled = NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
 
     val currentProvider = AiProvider.fromId(providerDraft)
 
@@ -132,6 +132,29 @@ fun SettingsScreen(vm: MainViewModel, nav: NavHostController) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 8.dp)
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 12.dp)
+                        ) {
+                            androidx.compose.material3.Switch(
+                                checked = keepAlive,
+                                onCheckedChange = { on ->
+                                    vm.setKeepAlive(on)
+                                    if (on) ListenerKeepAliveService.start(context)
+                                    else ListenerKeepAliveService.stop(context)
+                                }
+                            )
+                            Text(
+                                "  Background listening",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Text(
+                            "Keeps the listener alive in the background with a foreground service. Turn it off to save battery — notifications are then read mainly when you open the app.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
                         )
                     }
                 }

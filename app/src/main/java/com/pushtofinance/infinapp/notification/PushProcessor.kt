@@ -29,6 +29,8 @@ class PushProcessor(private val context: Context) {
             if (force) "PushToFinance (test)" else pkg
         }
 
+        val store = parsed.storeName?.let { if (it.equals(appName, ignoreCase = true)) null else it }
+
         val amountPln = ExchangeRateClient(app.settings).toPln(amount, parsed.currency)
 
         val logId = app.repository.insertPushLog(
@@ -41,7 +43,7 @@ class PushProcessor(private val context: Context) {
                 currency = parsed.currency,
                 amountPln = amountPln,
                 cardName = parsed.cardName,
-                storeName = parsed.storeName,
+                storeName = store,
                 timestamp = System.currentTimeMillis(),
                 status = Types.STATUS_PENDING,
                 isIncome = parsed.isIncome
@@ -58,7 +60,7 @@ class PushProcessor(private val context: Context) {
             currency = parsed.currency,
             amountPln = amountPln,
             cardName = parsed.cardName,
-            storeName = parsed.storeName,
+            storeName = store,
             isIncome = parsed.isIncome
         )
         PendingCaptures.add(capture)

@@ -25,6 +25,7 @@ class SettingsManager(private val context: Context) {
         val KEY_AI_BASE_URL = stringPreferencesKey("ai_base_url")
         val KEY_SELECTED_APPS = stringSetPreferencesKey("selected_apps")
         val KEY_ONBOARDED = booleanPreferencesKey("onboarded")
+        val KEY_KEEP_ALIVE = booleanPreferencesKey("keep_alive")
         val KEY_RATE_CACHE = stringPreferencesKey("rate_cache")
         val KEY_RATE_TS = longPreferencesKey("rate_ts")
     }
@@ -36,6 +37,7 @@ class SettingsManager(private val context: Context) {
     val aiBaseUrl: Flow<String> = context.prefsDataStore.data.map { it[KEY_AI_BASE_URL] ?: "" }
     val selectedApps: Flow<Set<String>> = context.prefsDataStore.data.map { it[KEY_SELECTED_APPS] ?: emptySet() }
     val onboarded: Flow<Boolean> = context.prefsDataStore.data.map { it[KEY_ONBOARDED] ?: false }
+    val keepAlive: Flow<Boolean> = context.prefsDataStore.data.map { it[KEY_KEEP_ALIVE] ?: true }
     val rateCache: Flow<String> = context.prefsDataStore.data.map { it[KEY_RATE_CACHE] ?: "" }
     val rateTimestamp: Flow<Long> = context.prefsDataStore.data.map { it[KEY_RATE_TS] ?: 0L }
 
@@ -46,6 +48,7 @@ class SettingsManager(private val context: Context) {
     suspend fun setAiBaseUrl(value: String) = context.prefsDataStore.edit { it[KEY_AI_BASE_URL] = value }
     suspend fun setSelectedApps(value: Set<String>) = context.prefsDataStore.edit { it[KEY_SELECTED_APPS] = value }
     suspend fun setOnboarded(value: Boolean) = context.prefsDataStore.edit { it[KEY_ONBOARDED] = value }
+    suspend fun setKeepAlive(value: Boolean) = context.prefsDataStore.edit { it[KEY_KEEP_ALIVE] = value }
     suspend fun setRateCache(json: String, ts: Long) = context.prefsDataStore.edit {
         it[KEY_RATE_CACHE] = json
         it[KEY_RATE_TS] = ts
